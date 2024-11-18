@@ -73,6 +73,7 @@ app.post('/v2/messages', jwt({ secret: JWT_SECRET }), async (c) => {
       )
   }
   nc.drain()
+  return c.json({ message: 'ok' })
 })
 
 export default {
