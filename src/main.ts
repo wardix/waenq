@@ -22,7 +22,9 @@ app.post('/v2/messages', jwt({ secret: JWT_SECRET }), async (c) => {
 
   messageHeaders.set(
     'to',
-    isNaN(parseFloat(data.to)) ? data.to : `${data.to}@s.whatsapp.net`,
+    data.to.endsWith('@g.us') || data.to.endsWith('@s.whatsapp.net')
+      ? data.to
+      : `${data.to}@s.whatsapp.net`,
   )
   let body = ''
   for (const key in data) {
