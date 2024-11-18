@@ -19,7 +19,11 @@ app.post('/v2/messages', jwt({ secret: JWT_SECRET }), async (c) => {
   })
   const js = nc.jetstream()
   const messageHeaders = headers()
-  messageHeaders.set('to', data.to)
+
+  messageHeaders.set(
+    'to',
+    isNaN(parseFloat(data.to)) ? data.to : `${data.to}@s.whatsapp.net`,
+  )
   let body = ''
   for (const key in data) {
     if (key == 'body') {
