@@ -26,58 +26,18 @@ app.post('/v2/messages', jwt({ secret: JWT_SECRET }), async (c) => {
       ? data.to
       : `${data.to}@s.whatsapp.net`,
   )
-  let body = ''
+  messageHeaders.set('body', data.body)
   for (const key in data) {
-    if (key == 'body') {
-      body = data[key]
-      messageHeaders.set('body', body)
-      continue
+    if (!['body', 'to', 'text', 'image', 'video', 'document'].includes(key)) {
+      messageHeaders.set(key, data[key])
     }
-    if (key == 'to') {
-      continue
-    }
-    if (['text', 'image', 'video', 'document'].includes(key)) {
-      continue
-    }
-    messageHeaders.set(key, data[key])
   }
+  const payload =
+    data.body === 'text'
+      ? jc.encode(data.text)
+      : new Uint8Array(Buffer.from(data[data.body], 'base64'))
+  await js.publish('jobs.wa_delivery', payload, { headers: messageHeaders })
 
-  switch (body) {
-    case 'text':
-      await js.publish('jobs.wa_delivery', jc.encode(data.text), {
-        headers: messageHeaders,
-      })
-      break
-
-    case 'image':
-      await js.publish(
-        'jobs.wa_delivery',
-        Buffer.from(data.image, 'base64').toString('utf-8'),
-        {
-          headers: messageHeaders,
-        },
-      )
-      break
-
-    case 'video':
-      await js.publish(
-        'jobs.wa_delivery',
-        Buffer.from(data.video, 'base64').toString('utf-8'),
-        {
-          headers: messageHeaders,
-        },
-      )
-      break
-
-    case 'document':
-      await js.publish(
-        'jobs.wa_delivery',
-        Buffer.from(data.document, 'base64').toString('utf-8'),
-        {
-          headers: messageHeaders,
-        },
-      )
-  }
   nc.drain()
   return c.json({ message: 'ok' })
 })
