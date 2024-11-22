@@ -22,7 +22,7 @@ app.post('/v2/messages', jwt({ secret: JWT_SECRET }), async (c) => {
 
   messageHeaders.set(
     'to',
-    data.to.endsWith('@g.us') || data.to.endsWith('@s.whatsapp.net')
+    `${data.to}`.endsWith('@g.us') || `${data.to}`.endsWith('@s.whatsapp.net')
       ? data.to
       : `${data.to}@s.whatsapp.net`,
   )
