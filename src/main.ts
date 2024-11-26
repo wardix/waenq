@@ -22,14 +22,16 @@ app.post('/v2/messages', jwt({ secret: JWT_SECRET }), async (c) => {
 
   messageHeaders.set(
     'to',
-    `${data.to}`.endsWith('@g.us') || `${data.to}`.endsWith('@s.whatsapp.net')
-      ? data.to
-      : `${data.to}@s.whatsapp.net`,
+    btoa(
+      `${data.to}`.endsWith('@g.us') || `${data.to}`.endsWith('@s.whatsapp.net')
+        ? data.to
+        : `${data.to}@s.whatsapp.net`,
+    ),
   )
-  messageHeaders.set('body', data.body)
+  messageHeaders.set('body', btoa(data.body))
   for (const key in data) {
     if (!['body', 'to', 'text', 'image', 'video', 'document'].includes(key)) {
-      messageHeaders.set(key, data[key])
+      messageHeaders.set(key, btoa(data[key]))
     }
   }
   const payload =
